@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MINDWATCH - Student Health Monitoring</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#10B981',
+                        danger: '#EF4444',
+                        warning: '#F59E0B',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .pulse-animation {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        .chart-container {
+            height: 300px;
+        }
+        @media (max-width: 640px) {
+            .chart-container {
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <header class="bg-gradient-to-r from-primary to-indigo-600 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-bold">MINDWATCH</h1>
+                    <p class="text-indigo-100 mt-1" id="greeting">Good morning, Student!</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="notificationBtn" class="relative p-2 rounded-full hover:bg-indigo-500 transition">
+                        <i class="fas fa-bell text-xl"></i>
+                        <span id="notificationBadge" class="absolute top-0 right-0 bg-danger text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">3</span>
+                    </button>
+                    <div class="h-10 w-10 rounded-full bg-indigo-400 flex items-center justify-center">
+                        <i class="fas fa-user text-white"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <section class="mb-12">
+            <h2 class="text-xl font-semibold mb-6 text-gray-800">Real-time Health Monitoring</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-800">Heart Rate</h3>
+                                <p class="text-gray-500 text-sm">Pulse Sensor (BPM)</p>
+                            </div>
+                            <div class="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center">
+                                <i class="fas fa-heartbeat text-danger text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-6 flex items-end space-x-2">
+                            <span id="heartRateValue" class="text-4xl font-bold text-gray-800">72</span>
+                            <span class="text-lg text-gray-500">bpm</span>
+                            <div id="heartRateStatus" class="ml-auto px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                Normal
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div id="heartRateBar" class="bg-danger h-2.5 rounded-full" style="width: 60%"></div>
+                            </div>
+                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>40 bpm</span>
+                                <span>120 bpm</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-800">Stress Level</h3>
+                                <p class="text-gray-500 text-sm">GSR Sensor (μS)</p>
+                            </div>
+                            <div class="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
+                                <i class="fas fa-brain text-primary text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-6 flex items-end space-x-2">
+                            <span id="stressLevelValue" class="text-4xl font-bold text-gray-800">35</span>
+                            <span class="text-lg text-gray-500">%</span>
+                            <div id="stressLevelStatus" class="ml-auto px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                Moderate
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div id="stressLevelBar" class="bg-warning h-2.5 rounded-full" style="width: 35%"></div>
+                            </div>
+                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>0%</span>
+                                <span>100%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-12">
+            <h2 class="text-xl font-semibold mb-6 text-gray-800">Weekly Health Overview</h2>
+            <div class="bg-white rounded-xl shadow-md overflow-hidden p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h3 class="font-medium text-gray-800">Your Health Trends</h3>
+                        <p class="text-gray-500 text-sm">Last 7 days</p>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="px-3 py-1 bg-gray-100 rounded-md text-sm text-gray-700 hover:bg-gray-200">Week</button>
+                        <button class="px-3 py-1 bg-gray-100 rounded-md text-sm text-gray-700 hover:bg-gray-200">Month</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="weeklyChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-12" id="notificationsSection" style="display: none;">
+            <h2 class="text-xl font-semibold mb-6 text-gray-800">Health Notifications</h2>
+            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="divide-y divide-gray-200">
+                    <div class="p-4 hover:bg-gray-50 cursor-pointer flex items-start">
+                        <div class="mr-3 mt-1 text-danger">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-medium text-gray-800">Elevated Heart Rate</h4>
+                            <p class="text-gray-500 text-sm">Your heart rate reached 95 bpm during study session at 10:30 AM</p>
+                            <p class="text-gray-400 text-xs mt-1">Today, 10:32 AM</p>
+                        </div>
+                    </div>
+                    <div class="p-4 hover:bg-gray-50 cursor-pointer flex items-start">
+                        <div class="mr-3 mt-1 text-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-medium text-gray-800">High Stress Detected</h4>
+                            <p class="text-gray-500 text-sm">Stress level increased to 65% before your exam</p>
+                            <p class="text-gray-400 text-xs mt-1">Yesterday, 8:15 AM</p>
+                        </div>
+                    </div>
+                    <div class="p-4 hover:bg-gray-50 cursor-pointer flex items-start">
+                        <div class="mr-3 mt-1 text-secondary">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-medium text-gray-800">Good Recovery</h4>
+                            <p class="text-gray-500 text-sm">Your stress levels returned to normal after meditation</p>
+                            <p class="text-gray-400 text-xs mt-1">Yesterday, 7:30 PM</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 text-center border-t border-gray-200">
+                    <button class="text-primary text-sm font-medium hover:text-indigo-700">View All Notifications</button>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="text-xl font-semibold mb-6 text-gray-800">Daily Health Log</h2>
+            <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 class="font-medium text-gray-800">Record Your Daily Status</h3>
+                            <p class="text-gray-500 text-sm">Add notes about your activities and feelings</p>
+                        </div>
+                        <button id="addLogBtn" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-indigo-700 flex items-center">
+                            <i class="fas fa-plus mr-2"></i> Add Entry
+                        </button>
+                    </div>
+                    
+                    <div id="logEntries" class="space-y-4">
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-medium text-gray-800">Morning Study Session</h4>
+                                    <p class="text-gray-500 text-sm">Wed, Jun 14, 2023</p>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <span class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">HR: 82 bpm</span>
+                                    <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">Stress: 45%</span>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 mt-2">Felt slightly stressed while preparing for the calculus exam. Took a 5-minute break which helped.</p>
+                        </div>
+                        
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-medium text-gray-800">Afternoon Break</h4>
+                                    <p class="text-gray-500 text-sm">Tue, Jun 13, 2023</p>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">HR: 68 bpm</span>
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Stress: 20%</span>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 mt-2">Went for a short walk outside. Heart rate and stress levels decreased significantly after fresh air.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="logModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-medium text-gray-800">Add Health Log</h3>
+                    <button id="closeModalBtn" class="text-gray-400 hover:text-gray-500">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form id="logForm">
+                    <div class="mb-4">
+                        <label for="logTitle" class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                        <input type="text" id="logTitle" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                    </div>
+                    <div class="mb-4">
+                        <label for="logNotes" class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                        <textarea id="logNotes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"></textarea>
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" id="cancelLogBtn" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-indigo-700">Save Entry</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-gray-100 border-t border-gray-200 py-8">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <h2 class="text-xl font-bold text-gray-800">MINDWATCH</h2>
+                    <p class="text-gray-500 text-sm mt-1">Student Health Monitoring System</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-500 hover:text-primary">
+                        <i class="fab fa-github text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-primary">
+                        <i class="fab fa-twitter text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-primary">
+                        <i class="fab fa-linkedin text-xl"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="mt-8 pt-8 border-t border-gray-200 text-center text-gray-500 text-sm">
+                <p>© SIGMA SIGMA BOY</p>
+                <p class="mt-1">ESP32-based physiological monitoring system for student wellness.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Sometimes im thing about u wkwk -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        function setGreeting() {
+            const hour = new Date().getHours();
+            let greeting;
+            
+            if (hour < 12) greeting = "Good morning";
+            else if (hour < 18) greeting = "Good afternoon";
+            else greeting = "Good evening";
+            
+            document.getElementById('greeting').textContent = `${greeting}, Student!`;
+        }
+        
+        function updateSensorData() {
+            const heartRate = Math.floor(Math.random() * 30) + 70;
+            document.getElementById('heartRateValue').textContent = heartRate;
+            document.getElementById('heartRateBar').style.width = `${((heartRate - 40) / 80) * 100}%`;
+            
+            let heartRateStatus = "Normal";
+            let heartRateStatusClass = "bg-green-100 text-green-800";
+            
+            if (heartRate > 90) {
+                heartRateStatus = "High";
+                heartRateStatusClass = "bg-danger text-white";
+            } else if (heartRate < 60) {
+                heartRateStatus = "Low";
+                heartRateStatusClass = "bg-blue-100 text-blue-800";
+            }
+            
+            const heartRateStatusEl = document.getElementById('heartRateStatus');
+            heartRateStatusEl.textContent = heartRateStatus;
+            heartRateStatusEl.className = `ml-auto px-3 py-1 rounded-full text-xs font-medium ${heartRateStatusClass}`;
+            
+            const stressLevel = Math.floor(Math.random() * 30) + 20;
+            document.getElementById('stressLevelValue').textContent = stressLevel;
+            document.getElementById('stressLevelBar').style.width = `${stressLevel}%`;
+            
+            let stressLevelStatus = "Low";
+            let stressLevelStatusClass = "bg-green-100 text-green-800";
+            
+            if (stressLevel > 70) {
+                stressLevelStatus = "High";
+                stressLevelStatusClass = "bg-danger text-white";
+            } else if (stressLevel > 40) {
+                stressLevelStatus = "Moderate";
+                stressLevelStatusClass = "bg-yellow-100 text-yellow-800";
+            }
+            
+            const stressLevelStatusEl = document.getElementById('stressLevelStatus');
+            stressLevelStatusEl.textContent = stressLevelStatus;
+            stressLevelStatusEl.className = `ml-auto px-3 py-1 rounded-full text-xs font-medium ${stressLevelStatusClass}`;
+            
+            if (stressLevel > 70 || heartRate > 90) {
+                document.getElementById('notificationBadge').classList.remove('hidden');
+            }
+        }
+        
+        function initWeeklyChart() {
+            const ctx = document.getElementById('weeklyChart').getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [
+                        {
+                            label: 'Heart Rate (bpm)',
+                            data: [72, 75, 80, 78, 85, 76, 70],
+                            borderColor: '#EF4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        },
+                        {
+                            label: 'Stress Level (%)',
+                            data: [30, 35, 45, 50, 60, 40, 35],
+                            borderColor: '#F59E0B',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value % 20 === 0 ? value : '';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        document.getElementById('notificationBtn').addEventListener('click', function() {
+            const notificationsSection = document.getElementById('notificationsSection');
+            if (notificationsSection.style.display === 'none' || notificationsSection.style.display === '') {
+                notificationsSection.style.display = 'block';
+                document.getElementById('notificationBadge').classList.add('hidden');
+            } else {
+                notificationsSection.style.display = 'none';
+            }
+        });
+        
+        document.getElementById('addLogBtn').addEventListener('click', function() {
+            document.getElementById('logModal').classList.remove('hidden');
+        });
+        
+        document.getElementById('closeModalBtn').addEventListener('click', function() {
+            document.getElementById('logModal').classList.add('hidden');
+        });
+        
+        document.getElementById('cancelLogBtn').addEventListener('click', function() {
+            document.getElementById('logModal').classList.add('hidden');
+        });
+        
+        document.getElementById('logForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('logTitle').value;
+            const notes = document.getElementById('logNotes').value;
+            const now = new Date();
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = 'border border-gray-200 rounded-lg p-4';
+            logEntry.innerHTML = `
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h4 class="font-medium text-gray-800">${title || 'New Entry'}</h4>
+                        <p class="text-gray-500 text-sm">${now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                    </div>
+                    <div class="flex space-x-2">
+                        <span class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">HR: ${document.getElementById('heartRateValue').textContent} bpm</span>
+                        <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">Stress: ${document.getElementById('stressLevelValue').textContent}%</span>
+                    </div>
+                </div>
+                <p class="text-gray-600 mt-2">${notes || 'No notes provided.'}</p>
+            `;
+            
+            document.getElementById('logEntries').prepend(logEntry);
+            document.getElementById('logModal').classList.add('hidden');
+            document.getElementById('logTitle').value = '';
+            document.getElementById('logNotes').value = '';
+        });
+        
+        window.addEventListener('DOMContentLoaded', function() {
+            setGreeting();
+            initWeeklyChart();
+            updateSensorData();
+            
+            setInterval(updateSensorData, 5000);
+        });
+    </script>
+</body>
+</html>
